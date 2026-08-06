@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Which content pages are declining? A validated risk-ranking model vs. a transparent rule</title>
+<style>
+  :root {
+    --ink: #1c1c1c;
+    --muted: #5a5a5a;
+    --line: #e3e0d8;
+    --accent: #4c6f8f;
+    --bg: #fbfaf7;
+    --card: #ffffff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Georgia, serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.65;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 96px; }
+  header { margin-bottom: 40px; }
+  h1 {
+    font-size: 2rem;
+    line-height: 1.25;
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
+  .meta { color: var(--muted); font-size: 0.95rem; margin-bottom: 8px; }
+  .meta a { color: var(--accent); }
+  h2 {
+    font-size: 1.3rem;
+    margin-top: 48px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+  h3 { font-size: 1.05rem; margin-top: 28px; }
+  p { margin: 0 0 16px; }
+  .abstract {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 20px 24px;
+    font-size: 0.98rem;
+  }
+  .abstract strong { color: var(--accent); }
+  figure { margin: 28px 0; text-align: center; }
+  figure img {
+    max-width: 100%;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+  }
+  figcaption {
+    font-size: 0.9rem;
+    color: var(--muted);
+    margin-top: 10px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 0.92rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  th { color: var(--muted); font-weight: 600; }
+  tr:last-child td { font-weight: 600; }
+  ul, ol { padding-left: 22px; }
+  li { margin-bottom: 8px; }
+  code {
+    background: #f0ede5;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 0.88em;
+  }
+  .callout {
+    border-left: 3px solid var(--accent);
+    padding: 6px 16px;
+    margin: 20px 0;
+    background: #f2f5f7;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95rem;
+  }
+  footer {
+    margin-top: 64px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 0.88rem;
+  }
+  footer a { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="meta">FlyRank AI Enablement Portfolio — Capstone Research Paper</div>
+  <h1>Which content pages are declining? A validated risk-ranking model, checked honestly against a transparent rule</h1>
+  <div class="meta">Esar Fatima · August 2026 · <a href="https://github.com/EsarFatima/MachineLearning-flyrank-">Repo &amp; notebooks</a></div>
+</header>
+
+<div class="abstract">
+<strong>Abstract.</strong> Editors reviewing large content portfolios can't manually check every
+page each cycle. Using 30,000 pseudonymized pages across 32 clients from a 90-day search/engagement
+dataset, I built a Random Forest classifier to rank pages by decline risk (<code>trend_direction ==
+"down"</code>) and validated it on 7 clients held out entirely from training. Under an honest
+client-grouped split, the model reaches AUC 0.591 and precision@50 of 0.56 — beating a transparent
+staleness-and-visibility rule (AUC 0.492, precision@50 0.38) and a 0.511 base rate. A naive random
+split would have overstated the same model at AUC 0.723, almost entirely from client-level leakage.
+The result is a decision-support ranked queue, not a certainty about any single page.
+</div>
+
+<h2>1. The question</h2>
+<p>
+Among a client's existing pages, which ones are already declining in search visibility right now
+— and can a validated model rank that risk more usefully than a simple, transparent rule an
+editor could read in one sentence? The output is a ranked review queue with a reason code per
+page, feeding a human decision — never an automated rewrite, unpublish, or redirect.
+</p>
+
+<h2>2. Data</h2>
+<p>
+30,000 pages across 32 pseudonymized clients, one row per page, built from 90-day GSC/GA4
+aggregates. No client names, domains, raw URLs, or private query text appear anywhere in this
+page or the underlying repo.
+</p>
+<p>
+Excluded from modeling: <code>trend_direction</code> and <code>trend_pct</code> (these build the
+label), and the two raw 30-day impression windows <code>trend_pct</code> is computed from — a
+leakage check confirmed adding either back in inflates AUC to a fake 0.85–1.00.
+<code>client_id</code> is used only to group the train/test split, never as a model input.
+</p>
+
+<h2>3. Methodology</h2>
+<p>
+<strong>Baseline:</strong> a page is flagged if it's stale (≥90 days since last update) <em>and</em>
+visible (90-day impressions between 300 and 30,000) — two of the same signals available to the
+model, fully transparent, scored on the same rows.
+</p>
+<p>
+<strong>Model:</strong> Random Forest (300 trees, depth 6, class-balanced), chosen because several
+audited signals — like ranking position — turned out to be hump-shaped rather than linear, which
+a plain logistic fit represents poorly.
+</p>
+<p>
+<strong>Label:</strong> <code>is_declining_label = (trend_direction == "down")</code> — used
+directly rather than hand-built from scratch.
+</p>
+<p>
+<strong>Split:</strong> client-grouped 80/20 — 25 clients in training, 7 held out entirely, zero
+overlap. Clients repeat across many rows, so a row-level split lets a client's other pages leak
+the answer.
+</p>
+
+<h2>4. Results</h2>
+<figure>
+  <img src="figures/split_gap.png" alt="Bar chart comparing AUC under a random split vs a client-grouped split for logistic regression and random forest">
+  <figcaption>The split changes the answer more than the model does — 31 of 32 clients leaked across train/test under a naive random split.</figcaption>
+</figure>
+
+<table>
+<thead><tr><th>Method</th><th>AUC</th><th>Precision@20</th><th>Precision@50</th></tr></thead>
+<tbody>
+<tr><td>Base rate (majority class)</td><td>—</td><td>0.51</td><td>0.51</td></tr>
+<tr><td>Baseline rule</td><td>0.492</td><td>0.45</td><td>0.38</td></tr>
+<tr><td>Logistic Regression</td><td>0.541</td><td>0.50</td><td>0.56</td></tr>
+<tr><td>Random Forest</td><td>0.591</td><td>0.50</td><td>0.56</td></tr>
+</tbody>
+</table>
+<p style="font-size:0.88rem;color:var(--muted)">All rows: 7 held-out clients never seen in training, identical split and rows throughout.</p>
+
+<figure>
+  <img src="figures/precision_at_50.png" alt="Bar chart of precision at 50 comparing base rate, baseline rule, and random forest">
+  <figcaption>A real, modest edge over both the base rate and the transparent rule — enough to prioritize a queue, not enough to claim certainty.</figcaption>
+</figure>
+
+<h2>5. Limitations</h2>
+<ul>
+<li><strong>No causal claim</strong> — this ranks correlational risk; it does not show that refreshing a page causes recovery.</li>
+<li><strong>Small holdout</strong> — 0.56 rests on 7 clients; real, but not enough to trust the third decimal.</li>
+<li><strong>79% of the portfolio was seen in training</strong> — only the held-out 20.5% carries independent validation.</li>
+<li><strong>One client can dominate a pooled queue</strong> — the top of the ranked list skewed almost entirely to one genuinely high-decline client; a human needs to catch that before assigning a whole review cycle to one account.</li>
+<li><strong>No coverage for brand-new clients</strong> without ~90 days of history.</li>
+</ul>
+
+<h2>6. Ranked recommendations</h2>
+<figure>
+  <img src="figures/reason_code_breakdown.png" alt="Horizontal bar chart of reason code counts across the 30,000-page action queue">
+  <figcaption>The full-portfolio queue: 1,498 pages land in top-priority review, out of 30,000.</figcaption>
+</figure>
+<div class="callout">
+An editor starts with <code>review_for_refresh_priority</code> (1,498 pages: stale, visible, and
+in the model's top risk decile) — after checking the top of the list isn't dominated by a single
+client. <code>spot_check_only</code> pages (2,668, where the rule and model disagree) are never
+silently dropped and never fully automated.
+</div>
+
+<h2>7. Reproducibility</h2>
+<p>
+Full code, seeds (42 throughout), and re-run instructions live in the repo:
+<code>work/notebooks/capstone.ipynb</code> reproduces every number on this page from a fresh
+clone. See <code>work/capstone_report.md</code> for the complete eight-section write-up this
+page summarizes.
+</p>
+
+<footer>
+  Built on the <a href="https://flyrank.ai" target="_blank" rel="noopener">FlyRank ML Internship dataset</a>
+  (pseudonymized, internal). Built with pandas and scikit-learn. Full repo, notebooks, and
+  reproducibility instructions:
+  <a href="https://github.com/EsarFatima/MachineLearning-flyrank-">github.com/EsarFatima/MachineLearning-flyrank-</a>
+</footer>
+
+</div>
+</body>
+</html>

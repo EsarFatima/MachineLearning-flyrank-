@@ -128,8 +128,9 @@ page, feeding a human decision — never an automated rewrite, unpublish, or red
 <h2>2. Data</h2>
 <p>
 30,000 pages across 32 pseudonymized clients, one row per page, built from 90-day GSC/GA4
-aggregates. No client names, domains, raw URLs, or private query text appear anywhere in this
-page or the underlying repo.
+aggregates — the anonymized starter release shipped with the internship repo, not the full
+~79M-row production warehouse. No client names, domains, raw URLs, or private query text appear
+anywhere in this page or the underlying repo.
 </p>
 <p>
 Excluded from modeling: <code>trend_direction</code> and <code>trend_pct</code> (these build the
@@ -206,14 +207,19 @@ silently dropped and never fully automated.
 <p>
 Full code, seeds (42 throughout), and re-run instructions live in the repo:
 <code>work/notebooks/capstone.ipynb</code> reproduces every number on this page from a fresh
-clone. See <code>work/capstone_report.md</code> for the complete eight-section write-up this
+clone. See <code>work/capstone_report.md</code> for the complete nine-section write-up this
 page summarizes.
 </p>
 
+<h2>8. Acknowledgments &amp; Data Credit</h2>
+<p>
+Built on the <a href="https://flyrank.ai" target="_blank" rel="noopener">FlyRank ML Internship dataset</a>
+(pseudonymized, internal search/engagement data). Thanks to the FlyRank ML Internship program for
+data access and the mentorship that shaped this analysis.
+</p>
+
 <footer>
-  Built on the <a href="https://flyrank.ai" target="_blank" rel="noopener">FlyRank ML Internship dataset</a>
-  (pseudonymized, internal). Built with pandas and scikit-learn. Full repo, notebooks, and
-  reproducibility instructions:
+  Built with pandas and scikit-learn. Full repo, notebooks, and reproducibility instructions:
   <a href="https://github.com/EsarFatima/MachineLearning-flyrank-">github.com/EsarFatima/MachineLearning-flyrank-</a>
 </footer>
 

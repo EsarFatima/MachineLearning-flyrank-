@@ -107,8 +107,9 @@
 </header>
 
 <div class="abstract">
-<strong>Abstract.</strong> Editors reviewing large content portfolios can't manually check every
-page each cycle. Using 30,000 pseudonymized pages across 32 clients from a 90-day search/engagement
+<strong>Abstract.</strong> FlyRank publishes and manages content directly on client websites, and once
+live, pages quietly decline in search — with thousands of pages per portfolio, more than
+hand-written flags or an editor can catch every cycle. Using 30,000 pseudonymized pages across 32 clients from a 90-day search/engagement
 dataset, I built a Random Forest classifier to rank pages by decline risk (<code>trend_direction ==
 "down"</code>) and validated it on 7 clients held out entirely from training. Under an honest
 client-grouped split, the model reaches AUC 0.591 and precision@50 of 0.56 — beating a transparent
@@ -118,6 +119,11 @@ The result is a decision-support ranked queue, not a certainty about any single 
 </div>
 
 <h2>1. The question</h2>
+<p>
+FlyRank's product already flags declining pages today — a health score, quick-win tags,
+needs-attention flags — hand-written rules that work well until signals get numerous, tangled,
+and shifting. That gap, not a hypothetical one, is where this capstone sits.
+</p>
 <p>
 Among a client's existing pages, which ones are already declining in search visibility right now
 — and can a validated model rank that risk more usefully than a simple, transparent rule an

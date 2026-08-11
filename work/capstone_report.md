@@ -10,17 +10,24 @@
 
 ## Abstract
 
-Editors reviewing large content portfolios can't manually check every page each cycle. Using
-30,000 pseudonymized pages across 32 clients from a 90-day search/engagement dataset, I built a
-Random Forest classifier to rank pages by decline risk (`trend_direction == "down"`) and
-validated it on 7 clients held out entirely from training. Under an honest client-grouped split,
-the model reaches AUC 0.591 and precision@50 of 0.56 — beating a transparent
-staleness-and-visibility rule (AUC 0.492, precision@50 0.38) and a 0.511 base rate. A naive
-random split would have overstated the same model at AUC 0.723, almost entirely from
-client-level leakage. The result is a decision-support ranked queue, not a certainty about any
-single page.
+FlyRank publishes and manages content directly on client websites, and once live, pages quietly
+decline in search — with thousands of pages per portfolio, more than hand-written flags or an
+editor can catch every cycle. Using 30,000 pseudonymized pages across 32 clients from a 90-day
+search/engagement dataset, I built a Random Forest classifier to rank pages by decline risk
+(`trend_direction == "down"`) and validated it on 7 clients held out entirely from training.
+Under an honest client-grouped split, the model reaches AUC 0.591 and precision@50 of 0.56 —
+beating a transparent staleness-and-visibility rule (AUC 0.492, precision@50 0.38) and a 0.511
+base rate. A naive random split would have overstated the same model at AUC 0.723, almost
+entirely from client-level leakage. The result is a decision-support ranked queue, not a
+certainty about any single page.
 
 ## 1. Problem framing
+
+**The FlyRank problem this comes from:** FlyRank publishes content directly onto client sites,
+then watches search data as it decays. The product already flags declining pages today — a
+health score, quick-win tags, needs-attention flags — hand-written rules that work well until
+signals get numerous, tangled, and shifting. This capstone lives in exactly that gap: can a
+trained model rank risk better than the rule, checked honestly rather than assumed?
 
 **Decision supported:** which existing content pages a client's editor should review for a
 refresh this cycle, out of a portfolio too large to read by hand every time.
